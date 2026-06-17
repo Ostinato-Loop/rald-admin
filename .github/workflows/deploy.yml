@@ -10,22 +10,19 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build & Deploy (admin.rald.cloud)
+    name: Build & Deploy (rald-admin.pages.dev)
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: Upgrade npm
-        run: npm install -g npm@latest --prefer-online
-      - name: Install
-        run: npm install
+      - name: Install dependencies
+        run: npm install --no-audit
       - name: Build
         run: npm run build
         env:
-          VITE_API_URL:     https://api.rald.cloud
-          VITE_ADMIN_TOKEN: ""
+          VITE_API_URL: https://api.rald.cloud
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
