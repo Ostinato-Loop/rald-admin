@@ -17,20 +17,22 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - name: Install dependencies
-        run: npm install --no-audit
+      - name: Install dependencies (explicit — avoids npm crash)
+        run: |
+          npm install react@18.3.1 react-dom@18.3.1 --no-audit --no-fund
+          npm install --save-dev vite@5.4.14 @vitejs/plugin-react@4.3.4 @types/react@18.3.1 @types/react-dom@18.3.1 typescript@5.4.5 --no-audit --no-fund
       - name: Build
-        run: npm run build
+        run: npx vite build
         env:
           VITE_API_URL: https://api.rald.cloud
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
-          apiToken:       ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId:      ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName:    rald-admin
-          directory:      dist
-          gitHubToken:    ${{ secrets.GITHUB_TOKEN }}
+          apiToken:        ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId:       ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName:     rald-admin
+          directory:       dist
+          gitHubToken:     ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: "3"
       - name: Audit log
         if: always()
