@@ -1,0 +1,42 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:    { branches: [main] }
+  workflow_dispatch:
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build & Deploy (admin.rald.cloud)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: "npm" }
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL:      https://api.rald.cloud
+          VITE_ADMIN_TOKEN:  ""
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken:     ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId:    ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName:  rald-admin
+          directory:    dist
+          gitHubToken:  ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: "3"
+
+      - name: Audit log
+        if: always()
+        run: echo "AUDIT service=rald-admin commit=${{ github.sha }} actor=${{ github.actor }} ts=$(date -u +%Y-%m-%dT%H:%M:%SZ) status=${{ job.status }}"
