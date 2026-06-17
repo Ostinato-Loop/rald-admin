@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      - name: Install dependencies (yarn — avoids npm 10.9.8 crash)
+      - name: Install app dependencies (yarn v1 — avoids npm crash)
         run: yarn install --non-interactive
 
       - name: Build
@@ -26,8 +26,8 @@ jobs:
         env:
           VITE_API_URL: https://api.rald.cloud
 
-      - name: Deploy to Cloudflare Pages
-        run: yarn dlx wrangler@3 pages deploy dist --project-name=rald-admin --branch=main
+      - name: Deploy to Cloudflare Pages (npx wrangler — single pkg fetch, no npm tree crash)
+        run: npx --yes wrangler@3 pages deploy dist --project-name=rald-admin --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
